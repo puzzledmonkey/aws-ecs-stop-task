@@ -48,7 +48,7 @@ const main = async () => {
         .promise();
       if (existing && existing.tasks) {
         const tasksIds = existing.tasks
-          .filter((t) => t.group == name + ':' + service)
+          .filter((t) => t.group == group + ':' + service)
           .map((t) => t.taskArn.split('/').pop());
         for (let i = 0; i < tasksIds.length; i++) {
           core.info('Stopping task ID ' + tasksIds[i]);
