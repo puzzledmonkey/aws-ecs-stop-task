@@ -1,0 +1,19 @@
+name: 'Stop a task on ECS'
+description: 'Stop a task on ECS.'
+branding:
+  icon: 'activity'
+  color: 'white'
+inputs:
+  cluster:
+    description: "The name of the ECS service's cluster."
+    required: true
+  service:
+    description: 'The name of the service'
+    required: true
+  group:
+    description: 'The group for the task'
+    required: true
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
