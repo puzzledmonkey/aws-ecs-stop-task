@@ -1,34 +1,35 @@
-const core = require('@actions/core');
-const AWS = require('aws-sdk');
+const core = require("@actions/core");
+const AWS = require("aws-sdk");
 
 const ecs = new AWS.ECS();
 
 const main = async () => {
-  const cluster = core.getInput('cluster', { required: true });
-  const service = core.getInput('service', { required: true });
-  const group = core.getInput('group', { required: true });
-  if (group == 'service') {
+  const cluster = core.getInput("cluster", { required: true });
+  const service = core.getInput("service", { required: true });
+  const group = core.getInput("group", { required: true });
+  if (group == "service") {
     throw new Error(`Cannot stop a group called 'service'`);
   }
 
   try {
     // Get network configuration from aws directly from describe services
-    core.debug('Getting information from service');
+    core.debug("Getting information from service");
     const info = await ecs
       .describeServices({ cluster, services: [service] })
       .promise();
 
     if (!info || !info.services[0]) {
-      throw new Error(
-        `Could not find service ${service} in cluster ${cluster}`
-      );
+      // throw new Error(
+      //   `Could not find service ${service} in cluster ${cluster}`
+      // );
+      return;
     }
 
     const taskDefinition = info.services[0].taskDefinition;
     const taskDefinitionName = taskDefinition
-      .split('/')
+      .split("/")
       .pop()
-      .split(':')
+      .split(":")
       .shift();
     // core.setOutput('task-definition', taskDefinition);
 
@@ -48,10 +49,10 @@ const main = async () => {
         .promise();
       if (existing && existing.tasks) {
         const tasksIds = existing.tasks
-          .filter((t) => t.group == group + ':' + service)
-          .map((t) => t.taskArn.split('/').pop());
+          .filter((t) => t.group == group + ":" + service)
+          .map((t) => t.taskArn.split("/").pop());
         for (let i = 0; i < tasksIds.length; i++) {
-          core.info('Stopping task ID ' + tasksIds[i]);
+          core.info("Stopping task ID " + tasksIds[i]);
           await ecs.stopTask({ cluster, task: tasksIds[i] }).promise();
         }
       }
